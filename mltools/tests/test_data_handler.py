@@ -14,3 +14,13 @@ if __name__ == "__main__":
     profiler = DataProfiler(test_file)
     report_file = profiler.generate_report("test_report.html")
     print(f"Report generated: {report_file}")
+
+
+"""
+#To run this code in Colab/Kaggle Notebook
+test_file= "path_to_your_file"
+profiler = DataProfiler(test_file)
+report_file = profiler.generate_report("test_report.html")
+print(f"Report generated: {report_file}")
+profiler.display_report()
+"""
