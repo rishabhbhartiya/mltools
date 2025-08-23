@@ -8,16 +8,44 @@ class DataProfiler:
         self.df = self._load_file()
         self.report_html = ""
 
+    def _detect_encoding(self):
+        with open(self.file_path, "rb") as f:
+            raw_data = f.read(50000)  
+        result = chardet.detect(raw_data)
+        return result["encoding"] or "utf-8"
+
     def _load_file(self):
+        """
+        Load CSV, Excel, or JSON files with robust encoding handling for CSV.
+        """
+        import os
         ext = os.path.splitext(self.file_path)[1].lower()
-        if ext == ".csv":
-            return pd.read_csv(self.file_path)
-        elif ext in [".xlsx", ".xls"]:
-            return pd.read_excel(self.file_path)
-        elif ext == ".json":
-            return pd.read_json(self.file_path)
-        else:
+
+        loaders = {
+            ".csv": self._load_csv,
+            ".xlsx": lambda: pd.read_excel(self.file_path),
+            ".xls": lambda: pd.read_excel(self.file_path),
+            ".json": lambda: pd.read_json(self.file_path),
+        }
+
+        if ext not in loaders:
             raise ValueError(f"Unsupported file type: {ext}")
+
+        try:
+            return loaders[ext]()
+        except Exception as e:
+            raise RuntimeError(f"Failed to load {self.file_path}: {e}")
+
+    # def _load_file(self):
+    #     ext = os.path.splitext(self.file_path)[1].lower()
+    #     if ext == ".csv":
+    #         return pd.read_csv(self.file_path)
+    #     elif ext in [".xlsx", ".xls"]:
+    #         return pd.read_excel(self.file_path)
+    #     elif ext == ".json":
+    #         return pd.read_json(self.file_path)
+    #     else:
+    #         raise ValueError(f"Unsupported file type: {ext}")
 
     def generate_report(self, output_file="data_report.html"):
         html = "<html><head><style>"
