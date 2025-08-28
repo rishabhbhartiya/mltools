@@ -2,33 +2,32 @@ import pandas as pd
 import chardet
 import numpy as np
 import os
-from IPython.display import display, HTML
+from datetime import datetime
+import webbrowser
+from IPython.display import IFrame, display, HTML
 from sklearn.experimental import enable_iterative_imputer  
 from sklearn.impute import IterativeImputer, SimpleImputer
-from scipy.stats import shapiro, zscore
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder, OrdinalEncoder
+from scipy.stats import zscore, shapiro
 
-class DataCleaner:
+class BaseDataLoader:
     def __init__(self, file_path=None, df=None):
         """
-        Writing condition so that user can either pass file_path or dataframe.
+        Base class for handling file loading or direct dataframe input.
         """
         if df is not None:
             self.df = df.copy()
         elif file_path is not None:
-            
             self.file_path = file_path
             self.df = self._load_file()
         else:
             raise ValueError("Either file_path or df must be provided.")
 
-        
-        self.df_original = self.df.copy() 
-        self.cleaning_report = {} 
+        self.df_original = self.df.copy()
+        self.cleaning_report = {}
 
     def _detect_encoding(self):
         with open(self.file_path, "rb") as f:
-            raw_data = f.read(50000)  
+            raw_data = f.read(50000)
         result = chardet.detect(raw_data)
         return result["encoding"] or "utf-8"
 
@@ -54,11 +53,33 @@ class DataCleaner:
         except Exception as e:
             raise RuntimeError(f"Failed to load {self.file_path}: {e}")
 
+    def _load_csv(self):
+        encoding = self._detect_encoding()
+        try:
+            return pd.read_csv(self.file_path, encoding=encoding)
+        except pd.errors.ParserError:
+            return pd.read_csv(
+                self.file_path,
+                encoding=encoding,
+                engine="python",
+                on_bad_lines="skip"
+            )
 
-    def missing_values(self):
-        """
-        Analyzes missing values and stores results in self.cleaning_report.
-        """
+
+
+class MissingValueHandler:
+    """
+    Handles missing value analysis and imputation.
+    Connects with BaseDataLoader by updating cleaning_report.
+    """
+
+    def __init__(self, base_loader: BaseDataLoader):
+        self.loader = base_loader
+        self.df = self.loader.df
+        self.report = {}
+
+    def analyze(self):
+        """Analyzes missing values and stores results in BaseDataLoader.cleaning_report."""
         missing_count = self.df.isnull().sum()
         missing_percent = (missing_count / len(self.df)) * 100
 
@@ -70,16 +91,20 @@ class DataCleaner:
         total_missing = missing_count.sum()
         overall_missing_percent = (total_missing / (self.df.shape[0] * self.df.shape[1])) * 100
 
-        self.cleaning_report["missing_values"] = {
+        self.report["missing_values"] = {
             "column_summary": summary,
             "overall_missing_percent": round(overall_missing_percent, 2)
         }
 
+        self.loader.cleaning_report.update(self.report)
 
+        return self.df
 
-    def impute_missing_values(self, random_state=42, max_iter=10):
+    def impute(self, random_state=42, max_iter=10):
         """
-        In this function first I am separating numerical and categorical columns, then applying IterativeImputer for numerical columns and SimpleImputer with 'most_frequent' strategy for categorical columns.
+        Imputes missing values:
+        - Numerical: IterativeImputer (BayesianRidge by default)
+        - Categorical: Most frequent (mode)
         """
         before_missing = self.df.isnull().sum().sum()
 
@@ -96,30 +121,46 @@ class DataCleaner:
 
         after_missing = self.df.isnull().sum().sum()
 
-        self.cleaning_report["imputation"] = {
+        self.report["imputation"] = {
             "missing_before": int(before_missing),
             "missing_after": int(after_missing),
             "numeric_strategy": "IterativeImputer (BayesianRidge)",
             "categorical_strategy": "Most Frequent (mode)"
         }
 
+        self.loader.cleaning_report.update(self.report)
 
-    def handle_outliers(self, df, alpha=0.05):
+        return self.df
+
+
+
+class OutlierHandler:
+    def __init__(self, base_loader):
         """
-        In this function I have treated outliers based on distribution of data and then applied capping.
+        Initialize OutlierHandler with BaseDataLoader object.
+        """
+        self.loader = base_loader
+        self.df = self.loader.df
+        self.cleaning_report = {}
+
+    def handle_outliers(self, alpha=0.05):
+        """
+        Treat outliers based on distribution of data and apply capping.
+        Uses Shapiro-Wilk test to decide between Z-score and IQR method.
         """
         report = {}
-        df = df.copy()
+        df = self.df.copy()
 
         for col in df.select_dtypes(include=[np.number]).columns:
             data = df[col].values  
 
-            stat, p = shapiro(data[:5000])  # sample for speed if large
+            # Shapiro-Wilk normality test (on sample of 5000 max)
+            stat, p = shapiro(data[:5000])  
             is_normal = p > alpha
 
             if is_normal:
                 # Z-score method
-                z_scores = zscore(data)
+                z_scores = zscore(data, nan_policy='omit')
                 threshold = 3
                 upper_cap = data.mean() + threshold * data.std()
                 lower_cap = data.mean() - threshold * data.std()
@@ -146,31 +187,91 @@ class DataCleaner:
                 "capped_max": float(df[col].max())
             }
 
+        # Save report
         self.cleaning_report["outliers"] = report
         return df
 
-    def remove_duplicates(self, df: pd.DataFrame) -> pd.DataFrame:
+
+
+class CleaningReport:
+    def __init__(self, title="Data Cleaning Report"):
+        self.steps = {}
+        self.title = title
+        self.created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    def add_step(self, step_name, report_dict):
+        """Store the report from each cleaning step."""
+        self.steps[step_name] = report_dict
+
+    def generate_html(self, output_path="cleaning_report.html"):
+        """Generate, save, and open the HTML report (browser or Jupyter)."""
+        html_content = f"""
+        <html>
+        <head>
+            <title>{self.title}</title>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    margin: 20px;
+                }}
+                h1 {{
+                    color: #2c3e50;
+                }}
+                .step {{
+                    margin-bottom: 20px;
+                    padding: 15px;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    background: #f9f9f9;
+                }}
+                .step h2 {{
+                    margin: 0;
+                    color: #34495e;
+                }}
+                table {{
+                    border-collapse: collapse;
+                    width: 100%;
+                    margin-top: 10px;
+                }}
+                th, td {{
+                    border: 1px solid #ccc;
+                    padding: 8px;
+                    text-align: left;
+                }}
+                th {{
+                    background: #eee;
+                }}
+            </style>
+        </head>
+        <body>
+            <h1>{self.title}</h1>
+            <p><b>Generated at:</b> {self.created_at}</p>
         """
-        This function removes duplicate rows from the DataFrame and updates the cleaning report.
-        """
-        df = df.copy()
 
-        duplicate_count = df.duplicated().sum()
+        for step, details in self.steps.items():
+            html_content += f"<div class='step'><h2>{step.capitalize()}</h2>"
 
-        if duplicate_count > 0:
-            df = df.drop_duplicates().reset_index(drop=True)
-            action = f"Removed {duplicate_count} duplicate rows."
-        else:
-            action = "No duplicate rows found."
+            if isinstance(details, dict):
+                html_content += "<table>"
+                for key, value in details.items():
+                    html_content += f"<tr><th>{key}</th><td>{value}</td></tr>"
+                html_content += "</table>"
+            else:
+                html_content += f"<p>{details}</p>"
 
-        self.cleaning_report["remove_duplicates"] = {
-            "initial_shape": df.shape,
-            "duplicates_found": int(duplicate_count),
-            "action": action
-        }
+            html_content += "</div>"
 
-        return df
+        html_content += "</body></html>"
 
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(html_content)
 
-    def cleaining_report(self, output_file="cleaning_report.html"):
-        pass
+        abs_path = os.path.abspath(output_path)
+
+        try:
+            get_ipython  # noqa: F821 (checks if running inside IPython/Jupyter)
+            display(IFrame(src=abs_path, width="100%", height="600px"))
+        except Exception:
+            webbrowser.open(f"file://{abs_path}")
+
+        return abs_path
