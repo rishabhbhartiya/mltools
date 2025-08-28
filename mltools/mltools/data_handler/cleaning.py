@@ -187,9 +187,54 @@ class OutlierHandler:
                 "capped_max": float(df[col].max())
             }
 
-        # Save report
         self.cleaning_report["outliers"] = report
         return df
+
+
+class DuplicatesHandler:
+    def __init__(self, base_loader):
+        """
+        Initialize DuplicatesHandler with BaseDataLoader object.
+        Parameters
+        ----------
+        base_loader : BaseDataLoader
+            Loader that provides the DataFrame.
+        """
+        self.loader = base_loader
+        self.df = self.loader.df.copy()   
+        self.cleaning_report = {}
+
+    def remove_duplicates(self, subset=None, keep="first", inplace=False):
+        """
+        Remove duplicate rows from the DataFrame and update cleaning report.
+
+        Returns
+        pd.DataFrame
+            DataFrame after removing duplicates.
+        """
+        df = self.df.copy()
+
+        initial_rows = df.shape[0]
+        duplicate_mask = df.duplicated(subset=subset, keep=keep)
+        duplicate_count = int(duplicate_mask.sum())
+
+        df_cleaned = df.drop_duplicates(subset=subset, keep=keep)
+        final_rows = df_cleaned.shape[0]
+
+        self.cleaning_report = {
+            "duplicates_found": duplicate_count,
+            "rows_before": initial_rows,
+            "rows_after": final_rows,
+            "rows_removed": initial_rows - final_rows,
+            "strategy": f"keep='{keep}'"
+        }
+
+        # Update loader df if inplace
+        if inplace:
+            self.loader.df = df_cleaned
+            self.df = df_cleaned
+
+        return df_cleaned
 
 
 
@@ -213,16 +258,20 @@ class CleaningReport:
                 body {{
                     font-family: Arial, sans-serif;
                     margin: 20px;
+                    background: #f4f6f9;
                 }}
                 h1 {{
                     color: #2c3e50;
+                    border-bottom: 2px solid #ccc;
+                    padding-bottom: 5px;
                 }}
                 .step {{
                     margin-bottom: 20px;
                     padding: 15px;
                     border: 1px solid #ddd;
                     border-radius: 8px;
-                    background: #f9f9f9;
+                    background: #ffffff;
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
                 }}
                 .step h2 {{
                     margin: 0;
@@ -239,7 +288,7 @@ class CleaningReport:
                     text-align: left;
                 }}
                 th {{
-                    background: #eee;
+                    background: #f0f0f0;
                 }}
             </style>
         </head>

@@ -4,7 +4,13 @@ import sys
 # Add the project root to sys.path so imports work
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from mltools.data_handler.cleaning import BaseDataLoader, MissingValueHandler, OutlierHandler, CleaningReport
+from mltools.data_handler.cleaning import (
+    BaseDataLoader, 
+    MissingValueHandler, 
+    OutlierHandler, 
+    DuplicatesHandler,   
+    CleaningReport
+)
 
 if __name__ == "__main__":
     test_file = os.path.join(os.path.dirname(__file__), "iris.csv")
@@ -20,16 +26,20 @@ if __name__ == "__main__":
     print("✅ Missing values handled!")
     print(df_cleaned.head())
 
-    # 🔹 Outlier handling
     outlier_handler = OutlierHandler(loader)
     df_outliers = outlier_handler.handle_outliers()
     print("✅ Outliers handled!")
     print(df_outliers.head())
 
-    # 🔹 Add both reports to CleaningReport
+    dup_handler = DuplicatesHandler(loader)
+    df_no_dupes = dup_handler.remove_duplicates()
+    print("✅ Duplicates removed!")
+    print(df_no_dupes.head())
+
     report = CleaningReport()
     report.add_step("Missing Values", mv_handler.report)
     report.add_step("Outliers", outlier_handler.cleaning_report["outliers"])
+    report.add_step("Duplicates", dup_handler.cleaning_report)
 
     html_report_path = os.path.join(os.path.dirname(__file__), "cleaning_report.html")
     report.generate_html(html_report_path)
