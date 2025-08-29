@@ -8,6 +8,7 @@ from IPython.display import IFrame, display, HTML
 from sklearn.experimental import enable_iterative_imputer  
 from sklearn.impute import IterativeImputer, SimpleImputer
 from scipy.stats import zscore, shapiro
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder, OrdinalEncoder
 
 class BaseDataLoader:
     def __init__(self, file_path=None, df=None):
@@ -111,13 +112,24 @@ class MissingValueHandler:
         num_cols = self.df.select_dtypes(include=[np.number]).columns
         cat_cols = self.df.select_dtypes(exclude=[np.number]).columns
 
+        num_cols = [col for col in num_cols if not self.df[col].isnull().all()]
+        cat_cols = [col for col in cat_cols if not self.df[col].isnull().all()]
+
         if len(num_cols) > 0:
             iter_imputer = IterativeImputer(random_state=random_state, max_iter=max_iter)
-            self.df[num_cols] = iter_imputer.fit_transform(self.df[num_cols])
+            self.df[num_cols] = pd.DataFrame(
+                iter_imputer.fit_transform(self.df[num_cols]),
+                columns=num_cols,
+                index=self.df.index
+            )
 
         if len(cat_cols) > 0:
             cat_imputer = SimpleImputer(strategy="most_frequent")
-            self.df[cat_cols] = cat_imputer.fit_transform(self.df[cat_cols])
+            self.df[cat_cols] = pd.DataFrame(
+                cat_imputer.fit_transform(self.df[cat_cols]),
+                columns=cat_cols,
+                index=self.df.index
+            )
 
         after_missing = self.df.isnull().sum().sum()
 
@@ -131,6 +143,7 @@ class MissingValueHandler:
         self.loader.cleaning_report.update(self.report)
 
         return self.df
+
 
 
 
@@ -235,6 +248,96 @@ class DuplicatesHandler:
             self.df = df_cleaned
 
         return df_cleaned
+    
+
+import pandas as pd
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder, OrdinalEncoder
+
+class CategoricalEncoder:
+    """
+    CategoricalEncoder handles encoding of categorical variables.
+    """
+    def __init__(self, base_loader, report, target_column=None, use_label_encoding=False, ordinal_mappings=None):
+        self.loader = base_loader               
+        self.report = report                    
+        self.target_column = target_column
+        self.use_label_encoding = use_label_encoding
+        self.ordinal_mappings = ordinal_mappings if ordinal_mappings else {}
+        self.encoders = {}                      
+        self.cleaning_report = {}               
+
+    def encode(self):
+        """
+        Perform encoding according to configuration and populate self.cleaning_report.
+        Returns the encoded DataFrame and writes it back to base_loader.df.
+        """
+        df = self.loader.df.copy()
+
+        target_info = "None"
+        if self.target_column and self.target_column in df.columns:
+            le = LabelEncoder()
+            df[self.target_column] = le.fit_transform(df[self.target_column].astype(str))
+            self.encoders[f"target:{self.target_column}"] = le
+            target_info = {
+                "column": self.target_column,
+                "method": "LabelEncoder",
+                "classes": list(le.classes_)
+            }
+
+        cat_cols = df.select_dtypes(include=["object", "category"]).columns.tolist()
+        if self.target_column in cat_cols:
+            cat_cols.remove(self.target_column)
+
+        ohe_columns, label_columns, ordinal_columns = [], [], []
+        created_features = 0
+        independent_info = {"method": "None", "columns": [], "created_features": 0}
+
+        if len(cat_cols) > 0:
+            if self.use_label_encoding:
+                for col in cat_cols:
+                    le = LabelEncoder()
+                    df[col] = le.fit_transform(df[col].astype(str))
+                    self.encoders[f"label:{col}"] = le
+                    label_columns.append(col)
+                independent_info = {
+                    "method": "LabelEncoder",
+                    "columns": label_columns,
+                    "created_features": 0
+                }
+            else:
+                ohe = OneHotEncoder(drop="first", sparse_output=False, handle_unknown="ignore")
+                transformed = ohe.fit_transform(df[cat_cols])
+                ohe_df = pd.DataFrame(transformed, columns=ohe.get_feature_names_out(cat_cols), index=df.index)
+                df = pd.concat([df.drop(columns=cat_cols), ohe_df], axis=1)
+                self.encoders["onehot"] = ohe
+                ohe_columns = cat_cols
+                created_features = ohe_df.shape[1]
+                independent_info = {
+                    "method": "OneHotEncoder(drop='first')",
+                    "columns": ohe_columns,
+                    "created_features": int(created_features)
+                }
+
+        for col, mapping in self.ordinal_mappings.items():
+            if col in df.columns:
+                oe = OrdinalEncoder(categories=[mapping])
+                df[col] = oe.fit_transform(df[[col]])
+                self.encoders[f"ordinal:{col}"] = oe
+                ordinal_columns.append(col)
+                
+        self.cleaning_report = {
+            "Target encoding": target_info,
+            "Independent encoding": independent_info,
+            "Ordinal encoded columns": ordinal_columns if ordinal_columns else "None",
+            "encoders_stored": list(self.encoders.keys())
+        }
+
+        self.loader.df = df
+
+        return df
+
+
+
 
 
 
@@ -324,3 +427,4 @@ class CleaningReport:
             webbrowser.open(f"file://{abs_path}")
 
         return abs_path
+

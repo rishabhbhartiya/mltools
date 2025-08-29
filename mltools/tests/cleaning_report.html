@@ -6,16 +6,20 @@
                 body {
                     font-family: Arial, sans-serif;
                     margin: 20px;
+                    background: #f4f6f9;
                 }
                 h1 {
                     color: #2c3e50;
+                    border-bottom: 2px solid #ccc;
+                    padding-bottom: 5px;
                 }
                 .step {
                     margin-bottom: 20px;
                     padding: 15px;
                     border: 1px solid #ddd;
                     border-radius: 8px;
-                    background: #f9f9f9;
+                    background: #ffffff;
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
                 }
                 .step h2 {
                     margin: 0;
@@ -32,16 +36,44 @@
                     text-align: left;
                 }
                 th {
-                    background: #eee;
+                    background: #f0f0f0;
                 }
             </style>
         </head>
         <body>
             <h1>Data Cleaning Report</h1>
-            <p><b>Generated at:</b> 2025-08-29 03:07:19</p>
-        <div class='step'><h2>Missing values</h2><table><tr><th>missing_values</th><td>{'column_summary':             Missing Count  Missing %
-150                     0       0.00
-4                       7       4.67
-setosa                  0       0.00
-versicolor              0       0.00
-virginica               0       0.00, 'overall_missing_percent': np.float64(0.93)}</td></tr><tr><th>imputation</th><td>{'missing_before': 7, 'missing_after': 0, 'numeric_strategy': 'IterativeImputer (BayesianRidge)', 'categorical_strategy': 'Most Frequent (mode)'}</td></tr></table></div><div class='step'><h2>Outliers</h2><table><tr><th>150</th><td>{'method': 'IQR', 'outliers_count': 0, 'capped_min': 4.3, 'capped_max': 7.9}</td></tr><tr><th>4</th><td>{'method': 'IQR', 'outliers_count': 10, 'capped_min': 2.0, 'capped_max': 4.3}</td></tr><tr><th>setosa</th><td>{'method': 'IQR', 'outliers_count': 0, 'capped_min': 1.0, 'capped_max': 6.9}</td></tr><tr><th>versicolor</th><td>{'method': 'IQR', 'outliers_count': 0, 'capped_min': 0.1, 'capped_max': 2.5}</td></tr><tr><th>virginica</th><td>{'method': 'IQR', 'outliers_count': 0, 'capped_min': 0.0, 'capped_max': 2.0}</td></tr></table></div></body></html>
+            <p><b>Generated at:</b> 2025-08-29 18:26:14</p>
+        <div class='step'><h2>Missing values</h2><table><tr><th>missing_values</th><td>{'column_summary':                          Missing Count  Missing %
+id                                   0        0.0
+diagnosis                            0        0.0
+radius_mean                          0        0.0
+texture_mean                         0        0.0
+perimeter_mean                       0        0.0
+area_mean                            0        0.0
+smoothness_mean                      0        0.0
+compactness_mean                     0        0.0
+concavity_mean                       0        0.0
+concave points_mean                  0        0.0
+symmetry_mean                        0        0.0
+fractal_dimension_mean               0        0.0
+radius_se                            0        0.0
+texture_se                           0        0.0
+perimeter_se                         0        0.0
+area_se                              0        0.0
+smoothness_se                        0        0.0
+compactness_se                       0        0.0
+concavity_se                         0        0.0
+concave points_se                    0        0.0
+symmetry_se                          0        0.0
+fractal_dimension_se                 0        0.0
+radius_worst                         0        0.0
+texture_worst                        0        0.0
+perimeter_worst                      0        0.0
+area_worst                           0        0.0
+smoothness_worst                     0        0.0
+compactness_worst                    0        0.0
+concavity_worst                      0        0.0
+concave points_worst                 0        0.0
+symmetry_worst                       0        0.0
+fractal_dimension_worst              0        0.0
+Unnamed: 32                        569      100.0, 'overall_missing_percent': np.float64(3.03)}</td></tr><tr><th>imputation</th><td>{'missing_before': 569, 'missing_after': 569, 'numeric_strategy': 'IterativeImputer (BayesianRidge)', 'categorical_strategy': 'Most Frequent (mode)'}</td></tr></table></div><div class='step'><h2>Outliers</h2><table><tr><th>id</th><td>{'method': 'IQR', 'outliers_count': 81, 'capped_min': 8670.0, 'capped_max': 20728995.5}</td></tr><tr><th>radius_mean</th><td>{'method': 'IQR', 'outliers_count': 14, 'capped_min': 6.981, 'capped_max': 21.9}</td></tr><tr><th>texture_mean</th><td>{'method': 'IQR', 'outliers_count': 7, 'capped_min': 9.71, 'capped_max': 30.244999999999997}</td></tr><tr><th>perimeter_mean</th><td>{'method': 'IQR', 'outliers_count': 13, 'capped_min': 43.79, 'capped_max': 147.49499999999998}</td></tr><tr><th>area_mean</th><td>{'method': 'IQR', 'outliers_count': 25, 'capped_min': 143.5, 'capped_max': 1326.3000000000002}</td></tr><tr><th>smoothness_mean</th><td>{'method': 'IQR', 'outliers_count': 6, 'capped_min': 0.057975, 'capped_max': 0.133695}</td></tr><tr><th>compactness_mean</th><td>{'method': 'IQR', 'outliers_count': 16, 'capped_min': 0.01938, 'capped_max': 0.22861999999999996}</td></tr><tr><th>concavity_mean</th><td>{'method': 'IQR', 'outliers_count': 18, 'capped_min': 0.0, 'capped_max': 0.28241000000000005}</td></tr><tr><th>concave points_mean</th><td>{'method': 'IQR', 'outliers_count': 10, 'capped_min': 0.0, 'capped_max': 0.15453499999999998}</td></tr><tr><th>symmetry_mean</th><td>{'method': 'IQR', 'outliers_count': 15, 'capped_min': 0.11119999999999995, 'capped_max': 0.24640000000000006}</td></tr><tr><th>fractal_dimension_mean</th><td>{'method': 'IQR', 'outliers_count': 15, 'capped_min': 0.04996, 'capped_max': 0.07874999999999999}</td></tr><tr><th>radius_se</th><td>{'method': 'IQR', 'outliers_count': 38, 'capped_min': 0.1115, 'capped_max': 0.84865}</td></tr><tr><th>texture_se</th><td>{'method': 'IQR', 'outliers_count': 20, 'capped_min': 0.3602, 'capped_max': 2.43415}</td></tr><tr><th>perimeter_se</th><td>{'method': 'IQR', 'outliers_count': 38, 'capped_min': 0.757, 'capped_max': 5.9835}</td></tr><tr><th>area_se</th><td>{'method': 'IQR', 'outliers_count': 65, 'capped_min': 6.802, 'capped_max': 86.19999999999999}</td></tr><tr><th>smoothness_se</th><td>{'method': 'IQR', 'outliers_count': 30, 'capped_min': 0.001713, 'capped_max': 0.012611500000000001}</td></tr><tr><th>compactness_se</th><td>{'method': 'IQR', 'outliers_count': 28, 'capped_min': 0.002252, 'capped_max': 0.061505}</td></tr><tr><th>concavity_se</th><td>{'method': 'IQR', 'outliers_count': 22, 'capped_min': 0.0, 'capped_max': 0.08249}</td></tr><tr><th>concave points_se</th><td>{'method': 'IQR', 'outliers_count': 19, 'capped_min': 0.0, 'capped_max': 0.025318}</td></tr><tr><th>symmetry_se</th><td>{'method': 'IQR', 'outliers_count': 27, 'capped_min': 0.007882, 'capped_max': 0.035960000000000006}</td></tr><tr><th>fractal_dimension_se</th><td>{'method': 'IQR', 'outliers_count': 28, 'capped_min': 0.0008948, 'capped_max': 0.008023}</td></tr><tr><th>radius_worst</th><td>{'method': 'IQR', 'outliers_count': 17, 'capped_min': 7.93, 'capped_max': 27.459999999999997}</td></tr><tr><th>texture_worst</th><td>{'method': 'IQR', 'outliers_count': 5, 'capped_min': 12.02, 'capped_max': 42.68}</td></tr><tr><th>perimeter_worst</th><td>{'method': 'IQR', 'outliers_count': 15, 'capped_min': 50.41, 'capped_max': 187.335}</td></tr><tr><th>area_worst</th><td>{'method': 'IQR', 'outliers_count': 35, 'capped_min': 185.2, 'capped_max': 1937.0500000000002}</td></tr><tr><th>smoothness_worst</th><td>{'method': 'IQR', 'outliers_count': 7, 'capped_min': 0.07250000000000001, 'capped_max': 0.1901}</td></tr><tr><th>compactness_worst</th><td>{'method': 'IQR', 'outliers_count': 16, 'capped_min': 0.02729, 'capped_max': 0.6269500000000001}</td></tr><tr><th>concavity_worst</th><td>{'method': 'IQR', 'outliers_count': 12, 'capped_min': 0.0, 'capped_max': 0.7855000000000001}</td></tr><tr><th>concave points_worst</th><td>{'method': 'IQR', 'outliers_count': 0, 'capped_min': 0.0, 'capped_max': 0.291}</td></tr><tr><th>symmetry_worst</th><td>{'method': 'IQR', 'outliers_count': 23, 'capped_min': 0.1565, 'capped_max': 0.41915}</td></tr><tr><th>fractal_dimension_worst</th><td>{'method': 'IQR', 'outliers_count': 24, 'capped_min': 0.05504, 'capped_max': 0.12301}</td></tr><tr><th>Unnamed: 32</th><td>{'method': 'IQR', 'outliers_count': 0, 'capped_min': nan, 'capped_max': nan}</td></tr></table></div><div class='step'><h2>Duplicates</h2><table><tr><th>duplicates_found</th><td>0</td></tr><tr><th>rows_before</th><td>569</td></tr><tr><th>rows_after</th><td>569</td></tr><tr><th>rows_removed</th><td>0</td></tr><tr><th>strategy</th><td>keep='first'</td></tr></table></div><div class='step'><h2>Encoding</h2><table><tr><th>Target encoding</th><td>{'column': 'diagnosis', 'method': 'LabelEncoder', 'classes': ['B', 'M']}</td></tr><tr><th>Independent encoding</th><td>{'method': 'None', 'columns': [], 'created_features': 0}</td></tr><tr><th>Ordinal encoded columns</th><td>None</td></tr><tr><th>encoders_stored</th><td>['target:diagnosis']</td></tr></table></div></body></html>
