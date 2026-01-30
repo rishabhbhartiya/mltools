@@ -1,0 +1,24 @@
+[
+    {
+        "degree": "MSc Computer Science",
+        "institution": "University of Milan",
+        "period": "2018 – 2023",
+        "coursework": [
+            "Machine Learning",
+            "Pattern Recognition",
+            "Intelligent Systems",
+            "Cloud Computing"
+        ]
+    },
+    {
+        "degree": "BSc Computer Science",
+        "institution": "Govt. Holkar Science College, Indore",
+        "period": "2015 – 2018",
+        "coursework": [
+            "Data Structures",
+            "Algorithms",
+            "Database Management",
+            "Operating Systems"
+        ]
+    }
+]

@@ -1,0 +1,11 @@
+[
+    {
+        "slug": "audio-pattern-recognition",
+        "title": "Audio Pattern Recognition Thesis",
+        "date": "2023",
+        "type": "MSc Thesis",
+        "excerpt": "Analyzed large-scale datasets to detect temporal patterns in unstructured audio using Deep Learning.",
+        "content": "This thesis explores the application of Convolutional Neural Networks (CNNs) and Recurrent Neural Networks (RNNs) for detecting subtle temporal patterns in noisy audio environments. The study involved creating a custom dataset of 10,000+ audio samples...",
+        "link": "https://rishabhbhartiya.github.io/Flipbook/"
+    }
+]

@@ -1,0 +1,42 @@
+[
+    {
+        "company": "Edza AI",
+        "role": "Machine Learning Engineer",
+        "period": "Sep 2024 – Present",
+        "points": [
+            "Designed and productionized end-to-end educational AI pipelines, serving models at scale.",
+            "Built marking-scheme–aware evaluation workflows to automate grading accuracy assessment.",
+            "Developed QC frameworks for hallucination control, reducing manual review effort by 40%.",
+            "Drove metrics-based model iteration, significantly improving content generation quality."
+        ]
+    },
+    {
+        "company": "NATRAJX (Freelance)",
+        "role": "Founder / Lead ML Engineer",
+        "period": "2023 – Present",
+        "points": [
+            "Led a small ML engineering team delivering freelance AI and data solutions for external clients.",
+            "Built and deployed ML pipelines for NLP, forecasting, and analytics using Python and FastAPI.",
+            "Designed REST APIs and client-facing dashboards for production model consumption.",
+            "Managed client requirements and delivered robust, scalable solutions for real-world use cases."
+        ]
+    },
+    {
+        "company": "ItalBest",
+        "role": "Python Programmer",
+        "period": "2022 – 2023",
+        "points": [
+            "Optimized data processing scripts, improving execution time by 20%.",
+            "Developed Django-based applications for internal business logic management."
+        ]
+    },
+    {
+        "company": "HacktivSpace",
+        "role": "ML Researcher",
+        "period": "2021 – 2022",
+        "points": [
+            "Conducted applied research in computer vision and pattern recognition.",
+            "Implemented state-of-the-art models for comparative analysis on benchmark datasets."
+        ]
+    }
+]
